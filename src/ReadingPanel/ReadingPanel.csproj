@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>../../assets/ReadingPanel.ico</ApplicationIcon>
+    <StartupObject>ReadingPanel.Program</StartupObject>
+    <Version>1.0.0</Version>
+    <Product>Reading Panel</Product>
+    <Description>Windows middle-click English-to-Chinese dictionary, sentence translator, and pronunciation panel.</Description>
+    <Authors>Soren</Authors>
+    <RepositoryUrl>https://github.com/Cusnd/reading-panel</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <DefineConstants Condition="'$(OnlineEdition)' == 'true'">$(DefineConstants);ONLINE_EDITION</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="ReadingPanel.Tests" />
+    <Content Include="../../assets/Piper-NOTICES.txt" Link="licenses/Piper-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.18.0" />
+    <PackageReference Include="NAudio.WinMM" Version="2.2.1" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(OnlineEdition)' != 'true'">
+    <Compile Remove="Core/WiktionaryDictionary.cs" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.34" />
+    <PackageReference Include="SQLitePCLRaw.bundle_winsqlite3" Version="2.1.11" />
+    <Content Include="../../assets/ecdict.sqlite3" Link="assets/ecdict.sqlite3" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" Condition="Exists('../../assets/ecdict.sqlite3')" />
+    <Content Include="../../assets/ECDICT-LICENSE.txt" Link="assets/ECDICT-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(OnlineEdition)' == 'true'">
+    <Compile Remove="Core/Dictionary.cs" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.13.1" />
+    <Content Include="../../assets/HtmlAgilityPack-LICENSE.txt" Link="licenses/HtmlAgilityPack-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+</Project>

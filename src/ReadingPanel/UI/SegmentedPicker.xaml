@@ -1,0 +1,16 @@
+<UserControl x:Class="ReadingPanel.UI.SegmentedPicker" x:ClassModifier="internal"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Focusable="False">
+    <Border Background="#EFEFEF" CornerRadius="9" Padding="3">
+        <Grid>
+            <Canvas IsHitTestVisible="False">
+                <Border x:Name="Indicator" Background="White" CornerRadius="6.5">
+                    <Border.RenderTransform><TranslateTransform x:Name="Slide"/></Border.RenderTransform>
+                    <Border.Effect><DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270" Opacity=".11" Color="#333333"/></Border.Effect>
+                </Border>
+            </Canvas>
+            <UniformGrid x:Name="Choices" Rows="1" SizeChanged="SizeChangedHandler"
+                         KeyboardNavigation.DirectionalNavigation="Cycle" KeyboardNavigation.TabNavigation="Once"/>
+        </Grid>
+    </Border>
+</UserControl>

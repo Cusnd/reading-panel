@@ -1,0 +1,75 @@
+name: Release Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.0.1)"
+        required: true
+        type: string
+      draft:
+        description: "Create as draft release"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Build Windows x64 Online & Offline Packages
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Cache ECDICT offline index
+        uses: actions/cache@v6
+        with:
+          path: assets/ecdict.sqlite3
+          key: ecdict-index-${{ hashFiles('tools/build_dictionary.py') }}
+
+      - name: Run Offline & Online tests
+        shell: pwsh
+        run: |
+          python tools/build_dictionary.py
+          dotnet test tests/ReadingPanel.Tests/ReadingPanel.Tests.csproj --configuration Release
+          dotnet test tests/ReadingPanel.Tests/ReadingPanel.Tests.csproj --configuration Release -p:OnlineEdition=true
+
+      - name: Publish Online & Offline ZIPs
+        shell: pwsh
+        run: .\tools\publish.ps1 -Edition Both
+
+      - name: Generate SHA-256 checksums
+        shell: pwsh
+        run: |
+          Get-FileHash dist\ReadingPanel-win-x64-global-online.zip, dist\ReadingPanel-win-x64-global-offline.zip -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLowerInvariant())  $(Split-Path -Leaf $_.Path)" } |
+            Set-Content -Path dist\SHA256SUMS.txt -Encoding ascii
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $args = @(
+            "release", "create", "${{ inputs.tag }}",
+            "dist/ReadingPanel-win-x64-global-online.zip",
+            "dist/ReadingPanel-win-x64-global-offline.zip",
+            "dist/SHA256SUMS.txt",
+            "--title", "Reading Panel ${{ inputs.tag }}",
+            "--generate-notes"
+          )
+          if ("${{ inputs.draft }}" -eq "true") { $args += "--draft" }
+          gh @args

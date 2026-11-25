@@ -1,0 +1,32 @@
+# Build outputs
+bin/
+obj/
+dist/
+outputs/
+TestResults/
+
+# Downloaded or generated offline dictionary assets (rebuilt via tools/build_dictionary.py)
+assets/*.sqlite3
+assets/stardict.db
+
+# Visual Studio & IDEs
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.nupkg
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+

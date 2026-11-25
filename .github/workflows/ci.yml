@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-online:
+    name: Build & Test (Online Edition)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore ReadingPanel.sln -p:OnlineEdition=true
+
+      - name: Build and test (Online)
+        run: dotnet test tests/ReadingPanel.Tests/ReadingPanel.Tests.csproj -p:OnlineEdition=true --configuration Release --no-restore
+
+  test-offline:
+    name: Build & Test (Offline Edition)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Cache ECDICT offline index
+        uses: actions/cache@v6
+        with:
+          path: assets/ecdict.sqlite3
+          key: ecdict-index-${{ hashFiles('tools/build_dictionary.py') }}
+
+      - name: Build ECDICT offline index if not cached
+        run: python tools/build_dictionary.py
+
+      - name: Restore dependencies
+        run: dotnet restore ReadingPanel.sln
+
+      - name: Build and test (Offline)
+        run: dotnet test tests/ReadingPanel.Tests/ReadingPanel.Tests.csproj --configuration Release --no-restore

@@ -1,0 +1,273 @@
+<Window x:Class="ReadingPanel.UI.PanelWindow" x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:ReadingPanel.UI"
+        Title="Reading Panel" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowActivated="False" ShowInTaskbar="False" SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize" WindowStartupLocation="Manual" UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display" Language="zh-CN"
+        FontFamily="Segoe UI, Microsoft YaHei, Noto Sans SC, Microsoft YaHei UI" Foreground="#252525">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ReadingPanelStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="CardFrame" TargetType="Border">
+                <Setter Property="Margin" Value="0,6"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Background" Value="White"/>
+            </Style>
+
+            <Style x:Key="SoundButton" TargetType="Button" BasedOn="{StaticResource QuietButton}">
+                <Setter Property="Width" Value="32"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Content" Value="{StaticResource VolumeGlyph}"/>
+                <Setter Property="ContentTemplate" Value="{StaticResource SoundIcon}"/>
+            </Style>
+            <Style x:Key="Definition" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei, Noto Sans SC, Source Han Sans CN, Source Han Sans SC, Microsoft YaHei UI"/>
+                <Setter Property="FontWeight" Value="Medium"/>
+                <Setter Property="FontSize" Value="14.5"/>
+                <Setter Property="LineHeight" Value="24"/>
+                <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+            <Style x:Key="PartOfSpeech" TargetType="TextBlock" BasedOn="{StaticResource Definition}">
+                <Setter Property="FontSize" Value="11.5"/>
+                <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+                <Setter Property="Padding" Value="0,0,12,0"/>
+                <Setter Property="TextWrapping" Value="NoWrap"/>
+            </Style>
+            <Style x:Key="LemmaDisclosure" TargetType="Expander">
+                <Setter Property="Margin" Value="0,10,0,0"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Expander">
+                            <StackPanel>
+                                <Border Height="1" Background="#E7E7E7"/>
+                                <ToggleButton x:Name="HeaderSite" Margin="0,3,0,0" MinHeight="32" Cursor="Hand"
+                                              FocusVisualStyle="{x:Null}"
+                                              AutomationProperties.Name="{Binding (AutomationProperties.Name), RelativeSource={RelativeSource TemplatedParent}}"
+                                              IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                              KeyboardNavigation.AcceptsReturn="True">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="Transparent">
+                                                <ContentPresenter VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{DynamicResource WordLabelWidth}"/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="原形" Style="{StaticResource PartOfSpeech}"/>
+                                        <TextBlock Grid.Column="1" Text="{TemplateBinding Header}"
+                                                   FontFamily="{StaticResource HeadwordFont}" FontStyle="Italic" FontSize="17"
+                                                   Foreground="{StaticResource Ink}" VerticalAlignment="Center" TextWrapping="Wrap"
+                                                   TextOptions.TextFormattingMode="Ideal"/>
+                                        <Border x:Name="ArrowPad" Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                                                Margin="8,0,0,0" BorderThickness="1" BorderBrush="Transparent" Background="Transparent">
+                                            <Path Data="M 1,2 L 5,6 L 9,2" Stroke="{StaticResource Muted}" StrokeThickness="1.35"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin=".5,.5"
+                                                  RenderTransform="{Binding ChevronRotation, ElementName=Details}"
+                                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                        </Border>
+                                    </Grid>
+                                </ToggleButton>
+                                <ui:LemmaReveal x:Name="Details" IsExpanded="{TemplateBinding IsExpanded}">
+                                    <Border Margin="0,3,0,0" Background="White" RenderOptions.ClearTypeHint="Enabled">
+                                        <ContentPresenter/>
+                                    </Border>
+                                </ui:LemmaReveal>
+                            </StackPanel>
+                            <ControlTemplate.Triggers>
+                                <Trigger SourceName="HeaderSite" Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ArrowPad" Property="Background" Value="#F2F2F2"/>
+                                </Trigger>
+                                <Trigger SourceName="HeaderSite" Property="IsPressed" Value="True">
+                                    <Setter TargetName="ArrowPad" Property="Background" Value="#E6E6E6"/>
+                                </Trigger>
+                                <Trigger SourceName="HeaderSite" Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="ArrowPad" Property="BorderBrush" Value="#757575"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid x:Name="Surface" MaxWidth="344" Margin="16">
+        <Grid.RenderTransform>
+            <TransformGroup><ScaleTransform x:Name="Scale"/><TranslateTransform x:Name="Slide"/></TransformGroup>
+        </Grid.RenderTransform>
+        <Border Style="{StaticResource CardFrame}" IsHitTestVisible="False">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="16" ShadowDepth="3" Direction="270" Opacity=".19" Color="#484848"/>
+            </Border.Effect>
+        </Border>
+        <Border x:Name="Card" Style="{StaticResource CardFrame}" BorderBrush="{StaticResource Edge}" BorderThickness="1"
+                RenderOptions.ClearTypeHint="Enabled">
+            <Grid x:Name="CardLayout">
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <Border x:Name="WordHeader" Background="White" CornerRadius="11,11,0,0">
+                    <!-- Keep the white text surface inside the layout clip at fractional DPI. -->
+                    <StackPanel Margin="20,14,20,0" Background="White" RenderOptions.ClearTypeHint="Enabled">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <WrapPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="Heading" VerticalAlignment="Center" Margin="0,0,6,0"
+                                           FontFamily="{StaticResource HeadwordFont}" FontStyle="Italic"
+                                           TextOptions.TextFormattingMode="Ideal" TextWrapping="Wrap"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <Button Style="{StaticResource QuietButton}" Click="SpeakClick" VerticalAlignment="Center"
+                                        Padding="2,0" Background="Transparent" Focusable="False"
+                                        Visibility="{Binding Visibility, ElementName=Phonetic}"
+                                        ToolTip="{Binding ToolTip, ElementName=WordSpeaker}"
+                                        ContextMenu="{Binding ContextMenu, ElementName=WordSpeaker}">
+                                    <TextBlock x:Name="Phonetic"
+                                               FontFamily="Segoe UI, Cambria" FontSize="13" Foreground="{StaticResource Muted}"
+                                               TextOptions.TextFormattingMode="Ideal" TextWrapping="Wrap"/>
+                                </Button>
+                            </WrapPanel>
+                            <Button x:Name="WordSpeaker" Grid.Column="1" Style="{StaticResource SoundButton}"
+                                    Background="White" Foreground="#505050" Width="30" Height="30"
+                                    AutomationProperties.HelpText="{Binding Text, ElementName=Phonetic}"
+                                    VerticalAlignment="Top" Margin="10,2,0,0" Click="SpeakClick">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Disc" CornerRadius="15" BorderThickness="1" BorderBrush="#E5E5E5"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Disc" Property="Background" Value="#F4F4F4"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="Disc" Property="Background" Value="#EAEAEA"/>
+                                            </Trigger>
+                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                <Setter TargetName="Disc" Property="BorderBrush" Value="#757575"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                        <TextBlock x:Name="HeadwordReference" Visibility="Collapsed" Foreground="{StaticResource Muted}"
+                                   FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="ExamLabels" Visibility="Collapsed" Foreground="{StaticResource Muted}"
+                                   FontSize="11.5" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+                <Grid Grid.Row="1">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Margin" Value="20,15,20,17"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Visibility, ElementName=WordHeader}" Value="Visible">
+                                    <Setter Property="Margin" Value="20,12,12,12"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <ScrollViewer x:Name="BodyScroll" MaxHeight="252" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" ScrollChanged="BodyScrollChanged">
+                        <ScrollViewer.Style>
+                            <Style TargetType="ScrollViewer">
+                                <Setter Property="Focusable" Value="False"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Visibility, ElementName=WordHeader}" Value="Visible">
+                                        <Setter Property="Template" Value="{StaticResource WordScrollTemplate}"/>
+                                    </DataTrigger>
+                                    <Trigger Property="ComputedVerticalScrollBarVisibility" Value="Visible">
+                                        <Setter Property="Focusable" Value="True"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollViewer.Style>
+                        <ScrollViewer.Resources>
+                            <Style TargetType="ScrollBar" BasedOn="{StaticResource ThinScrollBar}"/>
+                        </ScrollViewer.Resources>
+                        <StackPanel Background="White" RenderOptions.ClearTypeHint="Enabled">
+                            <TextBlock x:Name="DictionaryStatus" Visibility="Collapsed" Style="{StaticResource Definition}"
+                                       Foreground="{StaticResource Muted}" AutomationProperties.LiveSetting="Polite"/>
+                            <TextBlock x:Name="TranslationText" FontSize="15.5" FontWeight="Medium" LineHeight="26"
+                                       LineStackingStrategy="BlockLineHeight" TextWrapping="Wrap"/>
+                            <StackPanel x:Name="WordDefinitions">
+                                <Label x:Name="Meaning" Padding="0" HorizontalContentAlignment="Stretch"
+                                       Foreground="{StaticResource Ink}" Focusable="False"/>
+                                <StackPanel x:Name="RelatedSections"/>
+                            </StackPanel>
+                            <Button x:Name="ActionButton" Style="{StaticResource QuietButton}" HorizontalAlignment="Left"
+                                    Margin="0,12,0,0" Click="ActionClick"/>
+                            <StackPanel x:Name="SpeechNotice" Visibility="Collapsed" Margin="0,12,0,0">
+                                <TextBlock x:Name="SpeechMessage" FontSize="13" TextWrapping="Wrap"/>
+                                <Button Content="朗读设置" Style="{StaticResource QuietButton}"
+                                        HorizontalAlignment="Left" Margin="0,6,0,0" Click="VoiceSettingsClick"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid IsHitTestVisible="False" Margin="0,0,8,0" Visibility="{Binding Visibility, ElementName=WordHeader}">
+                        <Grid.Resources>
+                            <LinearGradientBrush x:Key="PaperFade" StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#00FFFFFF" Offset="0"/>
+                                <GradientStop Color="#FFFFFF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Grid.Resources>
+                        <Border x:Name="TopFade" Height="12" VerticalAlignment="Top" Background="{StaticResource PaperFade}"
+                                RenderTransformOrigin="0.5,0.5" Visibility="Collapsed">
+                            <Border.RenderTransform><ScaleTransform ScaleY="-1"/></Border.RenderTransform>
+                        </Border>
+                        <Border x:Name="BottomFade" Height="12" VerticalAlignment="Bottom" Background="{StaticResource PaperFade}" Visibility="Collapsed"/>
+                    </Grid>
+                </Grid>
+                <Border x:Name="Credit" Grid.Row="2" Visibility="Collapsed" BorderBrush="#E9E9E9"
+                        BorderThickness="0,1,0,0" Padding="20,7,20,8">
+                    <TextBlock FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource Muted}">
+                        <Hyperlink x:Name="Article" Foreground="{StaticResource Muted}" RequestNavigate="CreditClick"><Run x:Name="ArticleName"/></Hyperlink>
+                        · <Hyperlink x:Name="LicenseLink" Foreground="{StaticResource Muted}" RequestNavigate="CreditClick"><Run x:Name="LicenseName"/></Hyperlink>
+                    </TextBlock>
+                </Border>
+                <Border x:Name="ProviderRow" Grid.Row="2" Background="{StaticResource ToolbarPaper}"
+                        BorderBrush="#EAEAEA" BorderThickness="0,1,0,0" CornerRadius="0,0,11,11" Padding="11,5,13,5">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="TranslationSpeaker" Style="{StaticResource SoundButton}" Background="Transparent" Click="SpeakClick"/>
+                            <TextBlock x:Name="PendingStatus" Visibility="Hidden" VerticalAlignment="Center"
+                                       FontSize="11.5" Foreground="{StaticResource Muted}" Margin="3,0,0,0"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Margin="8,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Background="#EBEBEB" CornerRadius="8" Padding="2" RenderOptions.ClearTypeHint="Enabled">
+                            <Grid>
+                                <Canvas IsHitTestVisible="False">
+                                    <Border x:Name="Indicator" Width="0" Height="0" Background="White" CornerRadius="6">
+                                        <Border.RenderTransform><TranslateTransform x:Name="IndicatorSlide"/></Border.RenderTransform>
+                                        <Border.Effect><DropShadowEffect BlurRadius="3" ShadowDepth="1" Direction="270" Opacity=".17" Color="#474747"/></Border.Effect>
+                                    </Border>
+                                </Canvas>
+                                <WrapPanel x:Name="ProviderButtons"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+        <Path x:Name="Tip" IsHitTestVisible="False" Fill="White" Stroke="{StaticResource Edge}" StrokeThickness="1"
+              Data="M 0.5,7 L 5.4,2.1 Q 6.5,1 7.6,2.1 L 12.5,7" StrokeLineJoin="Round"
+              HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Path.RenderTransform><TranslateTransform x:Name="TipOffset"/></Path.RenderTransform>
+        </Path>
+    </Grid>
+</Window>

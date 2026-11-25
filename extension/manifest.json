@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Reading Panel",
+  "version": "1.1.0",
+  "description": "Look up the current selection with a middle click in the Windows reading panel.",
+  "icons": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzW5I2pabNZkkVQf/o318XpVgX5qWHgi04omkJ4XkJrhrUCJybOg72Xm3fMxBtvnunJFLqWT91DHAQVRvzqH3oReMgsfsS8CXInQviE0ZA4i6oNJsW4+c1siWedsHAjFL5xRqJD/VwsadsPM+RGwJaP20bwknAxYSS9oZYZ41MKGlc/hKFkylb2VQajYGgJTwidXaowIh2UQigpG1lNhlZcmbME5ckhUxCLiDsScONO73E/hx/B0Jw0rKsD+A2ucjUrFBUl/Nw5XY+Q8QB/1j+TOib5h4T1LlDsrsurN2NPHwkNlDdGxOssz8dZB6eK6j9moj3P/ZcRbHVpY+r1z/YQIDAQAB",
+  "permissions": ["nativeMessaging"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Reconnect Reading Panel" },
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*"],
+    "js": ["selection.js"],
+    "all_frames": true,
+    "run_at": "document_start"
+  }]
+}

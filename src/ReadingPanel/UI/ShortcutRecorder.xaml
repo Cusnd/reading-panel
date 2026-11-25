@@ -1,0 +1,14 @@
+<UserControl x:Class="ReadingPanel.UI.ShortcutRecorder" x:ClassModifier="internal"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="Recorder" Focusable="False">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="7,0,0,0" VerticalAlignment="Center">
+            <Button Content="清除" Click="ClearClick" Margin="0,0,4,0"/>
+            <Button Content="默认" Click="ResetClick"/>
+        </StackPanel>
+        <TextBox x:Name="Input" IsReadOnly="True" IsReadOnlyCaretVisible="False" Cursor="Hand"
+                 InputMethod.IsInputMethodEnabled="False" PreviewKeyDown="RecordKey" ContextMenu="{x:Null}"
+                 AutomationProperties.Name="{Binding (AutomationProperties.Name), ElementName=Recorder}"
+                 Tag="按下组合键" ToolTip="按下组合键或 F1–F24，按退格键清除"/>
+    </DockPanel>
+</UserControl>
